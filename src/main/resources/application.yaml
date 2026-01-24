@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: brp-mock-service
+  jackson:
+    date-format: "yyyy-MM-dd"
+server:
+  port: ${ENV_SERVER_PORT:8080}
+
+
+environment:
+  person-folder-path: "${BRP_PERSON_FOLDER_PATH:data/persons}"
+  #Configure the default response status for ALL mock endpoints (can be overridden per request)
+  global-forced-response-status: ${BRP_GLOBAL_FORCED_RESPONSE_STATUS:}
+  #Configure the default response delay (in milliseconds) for ALL mock endpoints (can be overridden per request)
+  global-forced-delay-ms: ${BRP_GLOBAL_FORCED_DELAY_MS:0}

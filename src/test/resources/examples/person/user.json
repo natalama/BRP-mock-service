@@ -1,0 +1,15 @@
+{
+  "user": {
+    "bsn": "123456789",
+    "firstName": "Jan",
+    "lastName": "Jansen",
+    "dateOfBirth": "1985-03-12"
+  },
+  "address": {
+    "street": "Main Street",
+    "houseNumber": "10A",
+    "postalCode": "1234AB",
+    "city": "Amsterdam",
+    "country": "NL"
+  }
+}
