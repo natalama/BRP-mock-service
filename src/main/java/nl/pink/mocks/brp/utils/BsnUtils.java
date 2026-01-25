@@ -1,9 +1,14 @@
 package nl.pink.mocks.brp.utils;
 
+import java.util.regex.Pattern;
+
 public class BsnUtils {
 
+    private static final Pattern NINE_DIGITS = Pattern.compile("\\d{9}");
+
+
     public static boolean isValidBsn(String bsn) {
-        if (bsn == null || !bsn.matches("\\d{8,9}")) {
+        if (bsn == null || !NINE_DIGITS.matcher(bsn).matches() || bsn.chars().allMatch(c -> c == '0')) {
             return false;
         }
 

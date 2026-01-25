@@ -30,7 +30,7 @@ public class SimpleResponseDelayInterceptor implements HandlerInterceptor {
                 , globalForcedDelayMs);
         int delayMs = NumberUtils.toInt(configDelayMs, 0);
         /**
-         * Just a simple thread.sleep
+         * Just a simple Thread.sleep
          * Not ideal since it's actually blocking the servlet thread
          * but good enough for simple mocking purposes
          * */

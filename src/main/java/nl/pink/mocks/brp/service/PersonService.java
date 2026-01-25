@@ -2,6 +2,7 @@ package nl.pink.mocks.brp.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.pink.mocks.brp.domain.Person;
+import nl.pink.mocks.brp.exception.PersonNotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class PersonService {
         this.baseDir = Paths.get(storageDir).toAbsolutePath().normalize();
     }
 
-    public Person getByBsn(String bsn) throws IllegalArgumentException, IOException {
+    public Person getByBsn(String bsn) throws IllegalArgumentException, IOException, PersonNotFoundException {
         if (StringUtils.isBlank(bsn)) {
             log.warn("Requested BSN is blank");
             throw new IllegalArgumentException("BSN is blank");
@@ -37,8 +38,9 @@ public class PersonService {
         Path personFilePath = baseDir.resolve(personFileName);
 
         if (!Files.exists(personFilePath)) {
-            log.info("Person with BSN {} not found", bsn);
-            return null;
+            String personNotFoundErrorMessage = "Person with BSN %s not found".formatted(bsn);
+            log.debug(personNotFoundErrorMessage);
+            throw new PersonNotFoundException(personNotFoundErrorMessage);
         }
         try (InputStream is = Files.newInputStream(personFilePath)) {
             return objectMapper.readValue(is, Person.class);
@@ -64,7 +66,7 @@ public class PersonService {
         Path target = baseDir.resolve(filename);
 
         if (Files.exists(target)) {
-            throw new IllegalArgumentException("Person file already exists: " + target.toString());
+            throw new IllegalArgumentException("Person file already exists: " + filename);
         }
 
         try {
