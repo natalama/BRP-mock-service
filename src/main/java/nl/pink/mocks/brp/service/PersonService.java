@@ -2,7 +2,9 @@ package nl.pink.mocks.brp.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.pink.mocks.brp.domain.Person;
+import nl.pink.mocks.brp.exception.PersonFileException;
 import nl.pink.mocks.brp.exception.PersonNotFoundException;
+import nl.pink.mocks.brp.utils.FakerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,14 +28,10 @@ public class PersonService {
     public PersonService(ObjectMapper objectMapper,
                          @Value("${environment.person-folder-path}") String storageDir) {
         this.objectMapper = objectMapper;
-        this.baseDir = Paths.get(storageDir).toAbsolutePath().normalize();
+        this.baseDir = Paths.get(storageDir);
     }
 
     public Person getByBsn(String bsn) throws IllegalArgumentException, IOException, PersonNotFoundException {
-        if (StringUtils.isBlank(bsn)) {
-            log.warn("Requested BSN is blank");
-            throw new IllegalArgumentException("BSN is blank");
-        }
         String personFileName = "person-%s.json".formatted(bsn);
         Path personFilePath = baseDir.resolve(personFileName);
 
@@ -46,42 +44,27 @@ public class PersonService {
             return objectMapper.readValue(is, Person.class);
         } catch (IOException e) {
             log.error("Failed to read person resource: {}", personFilePath, e);
-            throw new IOException("Failed to read person for BSN: " + bsn, e);
+            throw new PersonFileException("Failed to read person for BSN: " + bsn, e);
         }
     }
 
-    public void savePerson(Person person) {
-        String bsn = person.user().bsn();
-        if (StringUtils.isBlank(bsn)) {
-            throw new IllegalArgumentException("BSN is blank");
-        }
-        try {
-            Files.createDirectories(baseDir); // safe if directory already exists
-        } catch (IOException e) {
-            log.error("Failed to create directory `personFiles`", e);
-            throw new RuntimeException("Failed to create storage directory", e);
-        }
-
-        String filename = PERSON_FILE_NAME_FORMAT.formatted(bsn);
+    public void createPerson(Person person) throws PersonFileException {
+        String filename = PERSON_FILE_NAME_FORMAT.formatted(person.user().bsn());
         Path target = baseDir.resolve(filename);
 
         if (Files.exists(target)) {
-            throw new IllegalArgumentException("Person file already exists: " + filename);
+            throw new PersonFileException("Person file already exists: " + filename);
         }
-
         try {
             objectMapper.writeValue(target.toFile(), person);
-            log.info("Person with BSN {} saved successfully to {}", bsn, target);
+            log.info("Person with BSN {} saved successfully to {}", person.user().bsn(), target);
         } catch (IOException e) {
-            log.error("Failed to save person with BSN {}: {}", bsn, e.getMessage(), e);
-            throw new RuntimeException("Failed to save person: " + bsn, e);
+            log.error("Failed to save person with BSN {}: {}", person.user().bsn(), e.getMessage(), e);
+            throw new PersonFileException("Failed to save person data: " + person.user().bsn(), e);
         }
     }
 
-    public void deletePerson(String bsn) {
-        if (StringUtils.isBlank(bsn)) {
-            throw new IllegalArgumentException("BSN is blank");
-        }
+    public void deletePerson(String bsn) throws PersonFileException {
         String personFileName = PERSON_FILE_NAME_FORMAT.formatted(bsn);
         Path personFilePath = baseDir.resolve(personFileName);
         try {
@@ -93,7 +76,13 @@ public class PersonService {
         }
     }
 
-    public void upsertPerson(String bsn, Person person) {
+    public Person generateAndSaveRandomPerson() throws PersonFileException {
+        Person person = FakerFactory.createRandomPerson();
+        createPerson(person);
+        return person;
+    }
+
+    public Person upsertPerson(String bsn, Person person) throws PersonFileException {
         if (StringUtils.isBlank(bsn)) {
             throw new IllegalArgumentException("BSN is blank");
         }
@@ -102,10 +91,11 @@ public class PersonService {
             Path target = baseDir.resolve(filename);
             try {
                 objectMapper.writeValue(target.toFile(), person);
-                log.info("Person with BSN {} saved successfully to {}", bsn, target);
+                log.info("Person data saved successfully");
+                return person;
             } catch (IOException e) {
-                log.error("Failed to save person with BSN {}: {}", bsn, e.getMessage(), e);
-                throw new RuntimeException("Failed to save person: " + bsn, e);
+                log.error("Failed to save person data! ", e);
+                throw new PersonFileException("Failed to save person data!", e);
             }
         } else {
             throw new IllegalArgumentException("BSN in path and person do not match");

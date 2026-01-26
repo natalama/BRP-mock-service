@@ -1,7 +1,8 @@
-package nl.pink.mocks.brp.interceptor;
+package nl.pink.mocks.brp.interceptors;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import nl.pink.mocks.brp.constants.RequestConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -16,20 +17,20 @@ import java.io.IOException;
 @Component
 public class ForcedStatusInterceptor implements HandlerInterceptor {
 
-    private final String globalForcedCode;
+    private final String globalForcedResponseStatus;
     private static final Logger log = LoggerFactory.getLogger(ForcedStatusInterceptor.class);
 
     public ForcedStatusInterceptor(@Value("${environment.global-forced-response-status:}") String globalForcedStatus) {
-        this.globalForcedCode = globalForcedStatus;
+        this.globalForcedResponseStatus = globalForcedStatus;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         String forcedStatusCode = StringUtils.firstNonBlank(
-                request.getHeader("X-Forced-Status"),
-                request.getParameter("forcedMockStatus"),
-                globalForcedCode);
-        if (StringUtils.isNotBlank(forcedStatusCode)) {
+                request.getParameter(RequestConstants.REQ_PARAM_MOCK_STATUS),
+                request.getHeader(RequestConstants.HEADER_X_MOCKED_STATUS),
+                globalForcedResponseStatus);
+        if (StringUtils.isNotBlank(forcedStatusCode) && !forcedStatusCode.equalsIgnoreCase("-")) {
             if (!NumberUtils.isParsable(forcedStatusCode)) {
                 throw new IllegalArgumentException("Forced status code is not a valid number: " + forcedStatusCode);
             }

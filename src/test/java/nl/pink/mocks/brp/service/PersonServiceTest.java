@@ -1,11 +1,13 @@
 package nl.pink.mocks.brp.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.datafaker.Faker;
 import nl.pink.mocks.brp.config.JacksonConfig;
 import nl.pink.mocks.brp.domain.Address;
 import nl.pink.mocks.brp.domain.Person;
 import nl.pink.mocks.brp.domain.User;
 import nl.pink.mocks.brp.exception.PersonNotFoundException;
+import nl.pink.mocks.brp.utils.FakerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,39 +21,38 @@ import static org.junit.jupiter.api.Assertions.*;
 class PersonServiceTest {
     private PersonService personService;
     private ObjectMapper objectMapper;
-    private Path storageDir;
+    @TempDir
+    private Path tempDir;
+    private Faker faker;
 
     @BeforeEach
-    void setUp(@TempDir Path tempDir) {
+    void setUp() {
         objectMapper = new JacksonConfig().objectMapper();
-        storageDir = tempDir;
-        personService = new PersonService(objectMapper, storageDir.toString());
+        personService = new PersonService(objectMapper, tempDir.toString());
+        faker = new Faker();
     }
 
     @Test
     void testSaveAndGetPerson_success() throws IOException, PersonNotFoundException {
-        User user = new User("123456789", "John", "Doe", LocalDate.of(1990, 1, 1));
-        Address address = new Address("Main Street", "123", "1234AB", "Amsterdam", "Netherlands");
-        Person person = new Person(address, user);
-        personService.savePerson(person);
-        Person loaded = personService.getByBsn("123456789");
+        Person randomPerson = FakerFactory.createRandomPerson();
+        personService.createPerson(randomPerson);
+        Person loaded = personService.getByBsn(randomPerson.user().bsn());
         assertNotNull(loaded);
-        assertEquals("John", loaded.user().firstName());
-        assertEquals("Amsterdam", loaded.address().city());
+        assertEquals(randomPerson.user().firstName(), loaded.user().firstName());
+        assertEquals(randomPerson.address().city(), loaded.address().city());
     }
 
     @Test
-    void testGetPerson_notFound() throws IOException, PersonNotFoundException {
-        Person loaded = personService.getByBsn("000000000");
-        assertNull(loaded);
+    void testGetPerson_notFound() throws IOException {
+        assertThrows(PersonNotFoundException.class, () -> personService.getByBsn("000000000"));
     }
 
     @Test
     void testSavePerson_blankBsn() {
-        User user = new User("", "John", "Doe", LocalDate.of(1990, 1, 1));
-        Address address = new Address("Main Street", "123", "1234AB", "Amsterdam", "Netherlands");
+        User user = new User("", faker.name().firstName(), faker.name().lastName(), faker.timeAndDate().birthday());
+        Address address = FakerFactory.createRandomAddress();
         Person person = new Person(address, user);
-        assertThrows(IllegalArgumentException.class, () -> personService.savePerson(person));
+        assertThrows(IllegalArgumentException.class, () -> personService.createPerson(person));
     }
 
     @Test

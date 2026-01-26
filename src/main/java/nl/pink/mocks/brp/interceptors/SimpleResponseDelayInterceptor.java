@@ -1,7 +1,8 @@
-package nl.pink.mocks.brp.interceptor;
+package nl.pink.mocks.brp.interceptors;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import nl.pink.mocks.brp.constants.RequestConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,9 +26,9 @@ public class SimpleResponseDelayInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws InterruptedException {
         String configDelayMs = StringUtils.firstNonBlank(
-                request.getHeader("X-Mock-Delay"),
-                request.getParameter("mockDelayMs")
-                , globalForcedDelayMs);
+                request.getParameter(RequestConstants.REQ_PARAM_FORCED_DELAY_MS),
+                request.getHeader(RequestConstants.HEADER_X_FORCED_DELAY),
+                globalForcedDelayMs);
         int delayMs = NumberUtils.toInt(configDelayMs, 0);
         /**
          * Just a simple Thread.sleep
@@ -35,7 +36,7 @@ public class SimpleResponseDelayInterceptor implements HandlerInterceptor {
          * but good enough for simple mocking purposes
          * */
         if (delayMs > 0) {
-            Thread.currentThread().sleep(delayMs);
+            Thread.sleep(delayMs);
         }
         return true;
     }

@@ -2,16 +2,22 @@ package nl.pink.mocks.brp.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import nl.pink.mocks.brp.constants.RequestConstants;
 import nl.pink.mocks.brp.domain.Person;
+import nl.pink.mocks.brp.exception.PersonFileException;
 import nl.pink.mocks.brp.exception.PersonNotFoundException;
 import nl.pink.mocks.brp.service.PersonService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+
+import static nl.pink.mocks.brp.constants.RequestConstants.*;
 
 @Tag(name = "Person", description = "BRP Person mock endpoints")
 @RestController
@@ -32,9 +38,10 @@ public class PersonController {
     })
     @GetMapping("/{bsn}")
     public ResponseEntity<Person> getPersonByBsn(
-            @RequestHeader(value = "X-Forced-Status", required = false) String forcedStatus,
-            @RequestHeader(value = "X-Forced-Delay", required = false) String forcedDelay,
-            @RequestParam(value = "forcedMockStatus", required = false) String forcedMockStatus,
+            @RequestHeader(value = HEADER_X_MOCKED_STATUS, required = false) String forcedStatus,
+            @RequestHeader(value = HEADER_X_FORCED_DELAY, required = false) String forcedDelay,
+            @RequestParam(value = REQ_PARAM_MOCK_STATUS, required = false) String forcedMockStatus,
+            @RequestParam(value = REQ_PARAM_FORCED_DELAY_MS, required = false) String forcedDelayMs,
             @Parameter(description = "BSN of the person", required = true, example = "123456789")
             @PathVariable String bsn) throws PersonNotFoundException, IOException {
         Person person = personService.getByBsn(bsn);
@@ -47,14 +54,29 @@ public class PersonController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping(consumes = "application/json")
-    public ResponseEntity<Object> createPerson(
-            @RequestHeader(value = "X-Forced-Status", required = false) String forcedStatus,
-            @RequestHeader(value = "X-Forced-Delay", required = false) String forcedDelay,
-            @RequestParam(value = "forcedMockStatus", required = false) String forcedMockStatus,
+    public ResponseEntity<Person> createPerson(
+            @RequestHeader(value = HEADER_X_MOCKED_STATUS, required = false) String forcedStatus,
+            @RequestHeader(value = HEADER_X_FORCED_DELAY, required = false) String forcedDelay,
+            @RequestParam(value = REQ_PARAM_MOCK_STATUS, required = false) String forcedMockStatus,
+            @RequestParam(value = REQ_PARAM_FORCED_DELAY_MS, required = false) String forcedDelayMs,
             @Parameter(description = "Person object to create", required = true)
-            @RequestBody Person person) {
-        personService.savePerson(person);
-        return ResponseEntity.status(201).build();
+            @Valid @RequestBody Person person) throws PersonFileException {
+        personService.createPerson(person);
+        return ResponseEntity.status(201).body(person);
+    }
+
+    @Operation(summary = "Create a new random person", description = "Generates and creates a new person record with random details")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Random person created successfully")
+    })
+    @PostMapping(value = "/random", produces = "application/json")
+    public ResponseEntity<Person> createRandomPerson(
+            @RequestHeader(value = HEADER_X_MOCKED_STATUS, required = false) String forcedStatus,
+            @RequestHeader(value = HEADER_X_FORCED_DELAY, required = false) String forcedDelay,
+            @RequestParam(value = REQ_PARAM_MOCK_STATUS, required = false) String forcedMockStatus,
+            @RequestParam(value = REQ_PARAM_FORCED_DELAY_MS, required = false) String forcedDelayMs) throws PersonFileException {
+        Person person = personService.generateAndSaveRandomPerson();
+        return ResponseEntity.status(201).body(person);
     }
 
     @Operation(summary = "Insert or update a person", description = "Updates an existing person or creates a new one if not found")
@@ -65,13 +87,14 @@ public class PersonController {
     })
     @PutMapping(value = "/{bsn}", consumes = "application/json")
     public ResponseEntity<Object> upsertPerson(
-            @RequestHeader(value = "X-Forced-Status", required = false) String forcedStatus,
-            @RequestHeader(value = "X-Forced-Delay", required = false) String forcedDelay,
-            @RequestParam(value = "forcedMockStatus", required = false) String forcedMockStatus,
+            @RequestHeader(value = HEADER_X_MOCKED_STATUS, required = false) String forcedStatus,
+            @RequestHeader(value = HEADER_X_FORCED_DELAY, required = false) String forcedDelay,
+            @RequestParam(value = REQ_PARAM_MOCK_STATUS, required = false) String forcedMockStatus,
+            @RequestParam(value = REQ_PARAM_FORCED_DELAY_MS, required = false) String forcedDelayMs,
             @PathVariable String bsn,
-            @RequestBody Person person) {
-        personService.upsertPerson(bsn, person);
-        return ResponseEntity.ok().build();
+            @Valid @RequestBody Person person) throws PersonFileException {
+        Person updatedPerson = personService.upsertPerson(bsn, person);
+        return ResponseEntity.ok(updatedPerson);
     }
 
 
@@ -83,11 +106,12 @@ public class PersonController {
     })
     @DeleteMapping("/{bsn}")
     public ResponseEntity<Object> deletePerson(
-            @RequestHeader(value = "X-Forced-Status", required = false) String forcedStatus,
-            @RequestHeader(value = "X-Forced-Delay", required = false) String forcedDelay,
-            @RequestParam(value = "forcedMockStatus", required = false) String forcedMockStatus,
-            @PathVariable String bsn) {
+            @RequestHeader(value = HEADER_X_MOCKED_STATUS, required = false) String forcedStatus,
+            @RequestHeader(value = HEADER_X_FORCED_DELAY, required = false) String forcedDelay,
+            @RequestParam(value = REQ_PARAM_MOCK_STATUS, required = false) String forcedMockStatus,
+            @RequestParam(value = REQ_PARAM_FORCED_DELAY_MS, required = false) String forcedDelayMs,
+            @PathVariable String bsn) throws PersonFileException {
         personService.deletePerson(bsn);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Person with bsn %s deleted".formatted("*****" + bsn.substring(6)));
     }
 }

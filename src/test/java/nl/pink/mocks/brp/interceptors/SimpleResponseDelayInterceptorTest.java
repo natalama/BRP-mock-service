@@ -1,5 +1,6 @@
-package nl.pink.mocks.brp.interceptor;
+package nl.pink.mocks.brp.interceptors;
 
+import nl.pink.mocks.brp.constants.RequestConstants;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -15,7 +16,7 @@ class SimpleResponseDelayInterceptorTest {
         var response = new MockHttpServletResponse();
 
         int expectedMs = 50;
-        request.addHeader("X-Mock-Delay", String.valueOf(expectedMs));
+        request.addHeader(RequestConstants.HEADER_X_FORCED_DELAY, String.valueOf(expectedMs));
 
         long start = System.currentTimeMillis();
         boolean allowed = interceptor.preHandle(request, response, new Object());
@@ -33,7 +34,7 @@ class SimpleResponseDelayInterceptorTest {
         var response = new MockHttpServletResponse();
 
         int paramMs = 30;
-        request.setParameter("mockDelayMs", String.valueOf(paramMs));
+        request.setParameter(RequestConstants.REQ_PARAM_FORCED_DELAY_MS, String.valueOf(paramMs));
 
         long start = System.currentTimeMillis();
         interceptor.preHandle(request, response, new Object());
@@ -45,7 +46,7 @@ class SimpleResponseDelayInterceptorTest {
     @Test
     void invalidDelay_shouldNotSleep() throws Exception {
         // global is invalid, no header/param -> no delay
-        var interceptor = new SimpleResponseDelayInterceptor("not-a-number");
+        var interceptor = new SimpleResponseDelayInterceptor("weeeeee");
         var request = new MockHttpServletRequest();
         var response = new MockHttpServletResponse();
 

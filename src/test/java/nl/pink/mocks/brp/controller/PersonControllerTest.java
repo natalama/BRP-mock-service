@@ -1,14 +1,17 @@
 package nl.pink.mocks.brp.controller;
 
+import nl.pink.mocks.brp.constants.RequestConstants;
 import nl.pink.mocks.brp.domain.Address;
 import nl.pink.mocks.brp.domain.Person;
 import nl.pink.mocks.brp.domain.User;
+import nl.pink.mocks.brp.exception.PersonNotFoundException;
 import nl.pink.mocks.brp.service.PersonService;
+import nl.pink.mocks.brp.utils.FakerFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -25,6 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(PersonController.class)
+//disable security for this test
+@AutoConfigureMockMvc(addFilters = false)
 class PersonControllerTest {
 
     @Autowired
@@ -34,19 +39,18 @@ class PersonControllerTest {
 
     @Test
     void testGetPerson_success() throws Exception {
-        User user = new User("123456789", "Daan", "de Jong", LocalDate.of(1990, 1, 1));
-        Address address = new Address("Ridderplein", "123", "1234AB", "Gemert", "NL");
-        Person person = new Person(address, user);
-        when(personService.getByBsn(eq("123456789"))).thenReturn(person);
-        mockMvc.perform(get("/brp/person/123456789"))
+        Person person = FakerFactory.createRandomPerson();
+        String bsn = person.user().bsn();
+        when(personService.getByBsn(eq(bsn))).thenReturn(person);
+        mockMvc.perform(get("/brp/person/%s".formatted(bsn)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.user.firstName").value("Daan"))
-                .andExpect(jsonPath("$.address.city").value("Gemert"));
+                .andExpect(jsonPath("$.user.firstName").value(person.user().firstName()))
+                .andExpect(jsonPath("$.address.city").value(person.address().city()));
     }
 
     @Test
     void testGetPerson_notFound() throws Exception {
-        when(personService.getByBsn(eq("000000000"))).thenReturn(null);
+        when(personService.getByBsn(eq("000000000"))).thenThrow(PersonNotFoundException.class);
         mockMvc.perform(get("/brp/person/000000000"))
                 .andExpect(status().isNotFound());
     }
@@ -76,14 +80,12 @@ class PersonControllerTest {
 
     @Test
     void testGetPerson_withMockedStatus() throws Exception {
-        User user = new User("123456789", "Willem", "de Oud", LocalDate.of(1990, 1, 1));
-        Address address = new Address("Pastoor Poellplein", "123", "1234AB", "Gemert", "NL");
-        Person person = new Person(address, user);
-        when(personService.getByBsn(eq("123456789"))).thenReturn(person);
+        Person person = FakerFactory.createRandomPerson();
 
+        when(personService.getByBsn(eq("635926652"))).thenReturn(person);
         long start = System.currentTimeMillis();
-        mockMvc.perform(get("/brp/person/123456789")
-                        .header("X-Forced-Status", "504"))
+        mockMvc.perform(get("/brp/person/635926652")
+                        .header(RequestConstants.HEADER_X_MOCKED_STATUS, "504"))
                 .andExpect(status().isGatewayTimeout());
     }
 
