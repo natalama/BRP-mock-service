@@ -16,11 +16,16 @@ public class BsnUtils {
         int sum = 0;
 
         //Elfproef implementation
-        for (int i = 0; i < length; i++) {
-            int digit = Character.getNumericValue(bsn.charAt(i));
-            int weight = (length - i == 9) ? 9 : length - i; // 9 for the first digit if length is 9
+        for (int index = 0; index < length; index++) {
+            int digit = Character.getNumericValue(bsn.charAt(index));
+            int weight = (length - index == 9) ? 9 : length - index; // 9 for the first digit if length is 9
             sum += digit * weight;
         }
         return sum % 11 == 0;
     }
+
+    public static boolean isNotValidBsn(String bsn) {
+        return !isValidBsn(bsn);
+    }
+
 }

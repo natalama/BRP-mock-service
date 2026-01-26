@@ -1,8 +1,8 @@
 package nl.pink.mocks.brp.config;
 
-import nl.pink.mocks.brp.interceptor.ForcedStatusInterceptor;
-import nl.pink.mocks.brp.interceptor.LoggingInterceptor;
-import nl.pink.mocks.brp.interceptor.SimpleResponseDelayInterceptor;
+import nl.pink.mocks.brp.interceptors.ForcedStatusInterceptor;
+import nl.pink.mocks.brp.interceptors.LoggingInterceptor;
+import nl.pink.mocks.brp.interceptors.SimpleResponseDelayInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

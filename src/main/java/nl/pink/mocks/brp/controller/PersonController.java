@@ -2,17 +2,17 @@ package nl.pink.mocks.brp.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import nl.pink.mocks.brp.constants.RequestConstants;
 import nl.pink.mocks.brp.domain.Person;
 import nl.pink.mocks.brp.exception.PersonFileException;
 import nl.pink.mocks.brp.exception.PersonNotFoundException;
 import nl.pink.mocks.brp.service.PersonService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
+import org.springframework.validation.SmartValidator;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -25,9 +25,11 @@ import static nl.pink.mocks.brp.constants.RequestConstants.*;
 public class PersonController {
 
     private PersonService personService;
+    private final SmartValidator validator;
 
-    public PersonController(PersonService personService) {
+    public PersonController(PersonService personService, SmartValidator validator) {
         this.personService = personService;
+        this.validator = validator;
     }
 
     @Operation(summary = "Get person by BSN", description = "Returns a person for the given BSN if found")
@@ -54,15 +56,20 @@ public class PersonController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping(consumes = "application/json")
-    public ResponseEntity<Person> createPerson(
+    public ResponseEntity<?> createPerson(
             @RequestHeader(value = HEADER_X_MOCKED_STATUS, required = false) String forcedStatus,
             @RequestHeader(value = HEADER_X_FORCED_DELAY, required = false) String forcedDelay,
             @RequestParam(value = REQ_PARAM_MOCK_STATUS, required = false) String forcedMockStatus,
             @RequestParam(value = REQ_PARAM_FORCED_DELAY_MS, required = false) String forcedDelayMs,
             @Parameter(description = "Person object to create", required = true)
             @Valid @RequestBody Person person) throws PersonFileException {
-        personService.createPerson(person);
-        return ResponseEntity.status(201).body(person);
+        Errors errors = validator.validateObject(person);
+        if(errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(errors.getAllErrors());
+        } else {
+            personService.createPerson(person);
+            return ResponseEntity.status(201).body(person);
+        }
     }
 
     @Operation(summary = "Create a new random person", description = "Generates and creates a new person record with random details")

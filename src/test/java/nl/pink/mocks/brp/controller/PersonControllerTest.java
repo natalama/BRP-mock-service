@@ -1,9 +1,7 @@
 package nl.pink.mocks.brp.controller;
 
 import nl.pink.mocks.brp.constants.RequestConstants;
-import nl.pink.mocks.brp.domain.Address;
 import nl.pink.mocks.brp.domain.Person;
-import nl.pink.mocks.brp.domain.User;
 import nl.pink.mocks.brp.exception.PersonNotFoundException;
 import nl.pink.mocks.brp.service.PersonService;
 import nl.pink.mocks.brp.utils.FakerFactory;
@@ -16,8 +14,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;

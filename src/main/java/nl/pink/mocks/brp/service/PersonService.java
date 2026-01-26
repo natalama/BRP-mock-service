@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.pink.mocks.brp.domain.Person;
 import nl.pink.mocks.brp.exception.PersonFileException;
 import nl.pink.mocks.brp.exception.PersonNotFoundException;
+import nl.pink.mocks.brp.exception.PersonValidationException;
+import nl.pink.mocks.brp.utils.BsnUtils;
 import nl.pink.mocks.brp.utils.FakerFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Validator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,10 +27,14 @@ public class PersonService {
     private final Path baseDir;
     private static final Logger log = LoggerFactory.getLogger(PersonService.class);
 
+    Validator validator;
+
     public PersonService(ObjectMapper objectMapper,
-                         @Value("${environment.person-folder-path}") String storageDir) {
+                         @Value("${environment.person-folder-path}") String storageDir,
+                         Validator validator) {
         this.objectMapper = objectMapper;
         this.baseDir = Paths.get(storageDir);
+        this.validator = validator;
     }
 
     public Person getByBsn(String bsn) throws IllegalArgumentException, IOException, PersonNotFoundException {
@@ -48,7 +54,7 @@ public class PersonService {
         }
     }
 
-    public void createPerson(Person person) throws PersonFileException {
+    public void createPerson(Person person) throws PersonFileException, PersonValidationException {
         String filename = PERSON_FILE_NAME_FORMAT.formatted(person.user().bsn());
         Path target = baseDir.resolve(filename);
 
@@ -83,8 +89,8 @@ public class PersonService {
     }
 
     public Person upsertPerson(String bsn, Person person) throws PersonFileException {
-        if (StringUtils.isBlank(bsn)) {
-            throw new IllegalArgumentException("BSN is blank");
+        if (BsnUtils.isNotValidBsn(bsn)) {
+            throw new IllegalArgumentException("BSN is invalid");
         }
         if (person.user().bsn().equalsIgnoreCase(bsn)) {
             String filename = PERSON_FILE_NAME_FORMAT.formatted(bsn);
