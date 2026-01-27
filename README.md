@@ -61,15 +61,23 @@ this will force all endpoints to delay their response by 2000 ms unless overridd
 
 ### Order of precedence
 When both global and per-request configurations are set, the following order of precedence applies (from highest to lowest):
-1. Per-request query parameter (mockedStatus or mockedDelay)
+1. Per-request query parameter since it's explicitely in the URL (mockedStatus or mockedDelay)
 2. Per-request header (X-Mocked-Status or X-Mocked-Delay)
 3. Global configuration (BRP_GLOBAL_FORCED_RESPONSE_STATUS or BRP_GLOBAL_FORCED_DELAY
 
 Want to disregard the global-forced-response-status for a specific request? Set the header or query parameter to "-" (without "").
 
-### Known limitations
+### Building a docker-image out of this application
 
-- Scenario or scenario-switching via header is not supported yet
-- Not dockerized yet
+Ensure you have docker installed and running.
+Run the following command: 
+`./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=brp-mock-service:tag`
+
+After it's built, start the application using the following: 
+`docker run -p 8080:8080: brp-mock-service:1.0.0-SNAPSHOT`
+
+### Known limitations
+- Scenario or scenario-switching via header is not supported (yet)
 - There's no correct implementation of authentication and authorization yet
+  - **Workaround: Always enable the "security-disabled" profile**
 - No internationalization (i18n) yet
