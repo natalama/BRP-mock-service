@@ -13,7 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@Profile(SpringProfiles.SECURITY_DISABLED)
+//@Profile(SpringProfiles.SECURITY_DISABLED)
 public class DisabledSecurityConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DisabledSecurityConfig.class);

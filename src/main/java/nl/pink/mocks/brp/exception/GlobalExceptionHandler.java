@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-
+    @ExceptionHandler
     public ResponseEntity<?> handlePersonValidationException(PersonValidationException ex) {
         log.info("Person validation Exception caught: {} ", ex.getMessage());
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);

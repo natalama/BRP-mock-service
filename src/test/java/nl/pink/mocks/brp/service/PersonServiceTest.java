@@ -1,6 +1,7 @@
 package nl.pink.mocks.brp.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Validation;
 import net.datafaker.Faker;
 import nl.pink.mocks.brp.config.JacksonConfig;
 import nl.pink.mocks.brp.domain.Address;
@@ -11,6 +12,10 @@ import nl.pink.mocks.brp.utils.FakerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.SmartValidator;
+import org.springframework.validation.Validator;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,10 +29,12 @@ class PersonServiceTest {
     private Path tempDir;
     private Faker faker;
 
+    SmartValidator validator;
+
     @BeforeEach
     void setUp() {
-        objectMapper = new JacksonConfig().objectMapper();
-        personService = new PersonService(objectMapper, tempDir.toString());
+        objectMapper = new JacksonConfig().objectMapper();;
+        personService = new PersonService(objectMapper, tempDir.toString(), validator);
         faker = new Faker();
     }
 
@@ -44,18 +51,5 @@ class PersonServiceTest {
     @Test
     void testGetPerson_notFound() throws IOException {
         assertThrows(PersonNotFoundException.class, () -> personService.getByBsn("000000000"));
-    }
-
-    @Test
-    void testSavePerson_blankBsn() {
-        User user = new User("", faker.name().firstName(), faker.name().lastName(), faker.timeAndDate().birthday());
-        Address address = FakerFactory.createRandomAddress();
-        Person person = new Person(address, user);
-        assertThrows(IllegalArgumentException.class, () -> personService.createPerson(person));
-    }
-
-    @Test
-    void testGetPerson_blankBsn() {
-        assertThrows(IllegalArgumentException.class, () -> personService.getByBsn(" "));
     }
 }

@@ -53,7 +53,7 @@ class BrpMockServiceIntegrationTest {
                     "houseNumber": "313 III",
                     "postalCode": "3631 EK",
                     "city": "Oud Jeldameer",
-                    "country": "BAM"
+                    "country": "NO"
                   },
                   "user": {
                     "bsn": "174096151",
