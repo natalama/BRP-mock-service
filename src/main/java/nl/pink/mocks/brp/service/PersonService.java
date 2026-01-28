@@ -57,11 +57,11 @@ public class PersonService {
     public void createPerson(Person person) throws PersonFileException, PersonValidationException {
         String filename = PERSON_FILE_NAME_FORMAT.formatted(person.user().bsn());
         Path target = baseDir.resolve(filename);
+        if (Files.exists(target)) {
+            throw new PersonFileException("Person file already exists: " + filename);
+        }
         try {
             Files.createDirectories(baseDir); //create directories or ignore if it already exists, avoiding FileNotFoundException
-            if (Files.exists(target)) {
-                throw new PersonFileException("Person file already exists: " + filename);
-            }
             objectMapper.writeValue(target.toFile(), person);
             log.info("Person with BSN {} saved successfully to {}", person.user().bsn(), target);
         } catch (IOException e) {

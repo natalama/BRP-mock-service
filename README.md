@@ -71,10 +71,9 @@ Want to disregard the global-forced-response-status for a specific request? Set 
 
 Ensure you have docker installed and running.
 Run the following command: 
-`./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=brp-mock-service:tag`
+`./mvnw spring-boot:build-image`
 
-After it's built, start the application using the following: 
-`docker run -p 8080:8080: brp-mock-service:1.0.0-SNAPSHOT`
+This will create a docker image of brp-mock-service with the version specified in pom.xml
 
 ### Known limitations
 - Scenario or scenario-switching via header is not supported (yet)
