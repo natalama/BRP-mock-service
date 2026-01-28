@@ -81,7 +81,7 @@ class PersonControllerTest {
         when(personService.getByBsn(eq("635926652"))).thenReturn(person);
         long start = System.currentTimeMillis();
         mockMvc.perform(get("/brp/person/635926652")
-                        .header(RequestConstants.HEADER_X_MOCKED_STATUS, "504"))
+                        .header(RequestConstants.HEADER_MOCKED_STATUS, "504"))
                 .andExpect(status().isGatewayTimeout());
     }
 

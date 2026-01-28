@@ -1,0 +1,6 @@
+### Create a new person
+< {%
+    request.variables.set("personId", "123456789")
+%}
+GET {{baseUrl}}/brp/person/{{personId}}
+Content-Type: application/json

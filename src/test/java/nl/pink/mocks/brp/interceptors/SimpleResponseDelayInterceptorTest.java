@@ -16,7 +16,7 @@ class SimpleResponseDelayInterceptorTest {
         var response = new MockHttpServletResponse();
 
         int expectedMs = 50;
-        request.addHeader(RequestConstants.HEADER_X_FORCED_DELAY, String.valueOf(expectedMs));
+        request.addHeader(RequestConstants.HEADER_FORCED_DELAY_MS, String.valueOf(expectedMs));
 
         long start = System.currentTimeMillis();
         boolean allowed = interceptor.preHandle(request, response, new Object());

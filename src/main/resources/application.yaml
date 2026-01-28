@@ -18,7 +18,7 @@ server:
   address: localhost
 
 environment:
-  person-folder-path: "${BRP_PERSON_FOLDER_PATH:data/persons}"
+  person-folder-path: "${BRP_PERSON_FOLDER_PATH:/data/persons}"
   #Configure the default response status for ALL mock endpoints (can be overridden per request)
   global-forced-response-status: ${BRP_GLOBAL_FORCED_RESPONSE_STATUS:}
   #Configure the default response delay (in milliseconds) for ALL mock endpoints (can be overridden per request)

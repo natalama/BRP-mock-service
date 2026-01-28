@@ -1,6 +1,22 @@
 # BRP-mock-service
 Mock BRP service voor geautomatiseerde testen. De BRP (Basisregistratie Personen) levert persoonsgerelateerde gegevens.
 
+<!-- TOC -->
+* [API-documentation](#api-documentation)
+* [How to run](#how-to-run)
+    * [Locally:](#locally)
+* [Configurable elements:](#configurable-elements-)
+* [Mocked status and simulated delays](#mocked-status-and-simulated-delays)
+    * [Mocking the response status](#mocking-the-response-status)
+    * [Simulating delays](#simulating-delays)
+    * [Order of precedence](#order-of-precedence)
+    * [Disabling the global-forced-response-status or global-forced-delay-ms for a specific request](#disabling-the-global-forced-response-status-or-global-forced-delay-ms-for-a-specific-request)
+* [Building a docker-image out of this application](#building-a-docker-image-out-of-this-application)
+* [Known limitations](#known-limitations)
+<!-- TOC -->
+
+
+
 ## API-documentation
 The swagger documentation is available at: [http://localhost:8080/swagger-ui/index.html#/](http://localhost:8080/swagger-ui/index.html#/) after starting the server.
 
@@ -14,6 +30,7 @@ The swagger documentation is available at: [http://localhost:8080/swagger-ui/ind
    a. In command line: ` .\mvnw spring-boot:run` or ` .\mvn spring-boot:run` if you have maven.  
    b. in your IDE, run the main class `BrpMockServiceApplication.java`\
 4. The server will start on port 8080 by default.
+5. There are some examples under http folder. Remember to change the environment to e.g. local. Would recommend to run it from 1 - 6. 
 
 
 ## Configurable elements: 
@@ -36,7 +53,7 @@ You can mock the returned status for endpoints through one of the following:
 this will force all endpoints to return status 400 unless overridden by one of the other methods below:
 2. Setting BRP_GLOBAL_FORCED_RESPONSE_STATUS environment variable 
 3. Per request by doing one of the following:
-   4. Add header X-Mocked-Status with the desired status code. Example:\
+   4. Add header Mocked-Status with the desired status code. Example:\
          `curl --request GET --url 'http://localhost:8080/brp/person/174096151' --header 'Mocked-Status: 404' `
    5. Add query parameter mockedStatus with the desired status code. Example:\
          `curl --request POST --url 'http://localhost:8080/brp/person?mockedStatus=503' `
@@ -53,8 +70,8 @@ You can simulate response delays for endpoints through one of the following:
 this will force all endpoints to delay their response by 2000 ms unless overridden by one of the other methods below:
 2. Setting BRP_GLOBAL_FORCED_DELAY_MS environment variable
 3. Per request by doing one of the following:
-   4. Add header X-Mocked-Delay with the desired delay in milliseconds. Example:\
-         `curl --request GET --url 'http://localhost:8080/brp/person/174096151' --header 'Forced-Delay: 1500' `
+   4. Add header Forced-Delay-Ms with the desired delay in milliseconds. Example:\
+         `curl --request GET --url 'http://localhost:8080/brp/person/174096151' --header 'Forced-Delay-MS: 1500' `
    5. Add query parameter mockedDelay with the desired delay in milliseconds. Example:\
          `curl --request POST --url 'http://localhost:8080/brp/person?forcedDelayMs=3000'`
 
@@ -65,9 +82,10 @@ When both global and per-request configurations are set, the following order of 
 2. Per-request header (X-Mocked-Status or X-Mocked-Delay)
 3. Global configuration (BRP_GLOBAL_FORCED_RESPONSE_STATUS or BRP_GLOBAL_FORCED_DELAY
 
+### Disabling the global-forced-response-status or global-forced-delay-ms for a specific request
 Want to disregard the global-forced-response-status for a specific request? Set the header or query parameter to "-" (without "").
 
-### Building a docker-image out of this application
+## Building a docker-image out of this application
 
 Ensure you have docker installed and running.
 Run the following command: 
@@ -75,7 +93,7 @@ Run the following command:
 
 This will create a docker image of brp-mock-service with the version specified in pom.xml
 
-### Known limitations
+## Known limitations
 - Scenario or scenario-switching via header is not supported (yet)
 - There's no correct implementation of authentication and authorization yet
   - **Workaround: Always enable the "security-disabled" profile**

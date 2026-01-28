@@ -27,7 +27,7 @@ public class SimpleResponseDelayInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws InterruptedException {
         String configDelayMs = StringUtils.firstNonBlank(
                 request.getParameter(RequestConstants.REQ_PARAM_FORCED_DELAY_MS),
-                request.getHeader(RequestConstants.HEADER_X_FORCED_DELAY),
+                request.getHeader(RequestConstants.HEADER_FORCED_DELAY_MS),
                 globalForcedDelayMs);
         int delayMs = NumberUtils.toInt(configDelayMs, 0);
         /**

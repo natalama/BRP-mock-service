@@ -1,0 +1,6 @@
+### Returns a person not found error
+< {%
+    request.variables.set("personId", "foo")
+%}
+GET {{baseUrl}}/brp/person/{{personId}}
+Content-Type: application/json

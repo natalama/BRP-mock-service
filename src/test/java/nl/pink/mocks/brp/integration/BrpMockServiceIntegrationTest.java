@@ -86,7 +86,7 @@ class BrpMockServiceIntegrationTest {
     void forcedStatusViaHeader() {
         restTestClient.get()
                 .uri("/brp/person/013141627")
-                .header(RequestConstants.HEADER_X_MOCKED_STATUS, Integer.toString(HttpStatus.NOT_FOUND.value()))
+                .header(RequestConstants.HEADER_MOCKED_STATUS, Integer.toString(HttpStatus.NOT_FOUND.value()))
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -96,7 +96,7 @@ class BrpMockServiceIntegrationTest {
         restTestClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/brp/person/635926652")
-                        .queryParam(RequestConstants.REQ_PARAM_MOCK_STATUS, Integer.toString(HttpStatus.INTERNAL_SERVER_ERROR.value()))
+                        .queryParam(RequestConstants.REQ_PARAM_MOCKED_STATUS, Integer.toString(HttpStatus.INTERNAL_SERVER_ERROR.value()))
                         .build())
                 .exchange()
                 .expectStatus().is5xxServerError();

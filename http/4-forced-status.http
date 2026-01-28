@@ -1,0 +1,22 @@
+### Forced Status Code Example by adding header
+< {%
+    request.variables.set("personId", "165432159")
+%}
+GET {{baseUrl}}/brp/person/{{personId}}
+Mocked-Status: 400
+Content-Type: application/json
+
+### Force internal server error by query parameter
+< {%
+    request.variables.set("personId", "165432159")
+%}
+GET {{baseUrl}}/brp/person/{{personId}}?mockedStatus=500
+Content-Type: application/json
+
+### ignore global mock status for specific request
+< {%
+    request.variables.set("personId", "165432159")
+%}
+GET {{baseUrl}}/brp/person/{{personId}}
+Mocked-Status: -
+Content-Type: application/json

@@ -1,0 +1,19 @@
+### Create a person
+POST {{baseUrl}}/brp/person
+Content-Type: application/json
+
+{
+  "user": {
+    "bsn": "123456789",
+    "firstName": "Floor",
+    "lastName": "Jansen",
+    "dateOfBirth": "1985-03-28"
+  },
+  "address": {
+    "street": "Main Street",
+    "houseNumber": "10A",
+    "postalCode": "1234AB",
+    "city": "Amsterdam",
+    "country": "NL"
+  }
+}

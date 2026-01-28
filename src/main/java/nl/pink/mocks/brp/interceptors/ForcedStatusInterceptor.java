@@ -27,8 +27,8 @@ public class ForcedStatusInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         String forcedStatusCode = StringUtils.firstNonBlank(
-                request.getParameter(RequestConstants.REQ_PARAM_MOCK_STATUS),
-                request.getHeader(RequestConstants.HEADER_X_MOCKED_STATUS),
+                request.getParameter(RequestConstants.REQ_PARAM_MOCKED_STATUS),
+                request.getHeader(RequestConstants.HEADER_MOCKED_STATUS),
                 globalForcedResponseStatus);
         if (StringUtils.isNotBlank(forcedStatusCode) && !forcedStatusCode.equalsIgnoreCase("-")) {
             if (!NumberUtils.isParsable(forcedStatusCode)) {

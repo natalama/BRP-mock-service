@@ -1,0 +1,21 @@
+### Delay simulation by adding header
+< {%
+    request.variables.set("personId", "165432159")
+%}
+GET {{baseUrl}}/brp/person/{{personId}}
+Forced-Delay-Ms: 1500
+Content-Type: application/json
+
+### Delay simulation by query parameter
+< {%
+    request.variables.set("personId", "165432159")
+%}
+GET {{baseUrl}}/brp/person/{{personId}}?forcedDelayMs=2000
+Content-Type: application/json
+
+### ignore delay for specific request
+< {%
+    request.variables.set("personId", "165432159")
+%}
+GET {{baseUrl}}/brp/person/{{personId}}?forcedDelayMs=-
+Content-Type: application/json
