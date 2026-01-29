@@ -20,6 +20,11 @@
         <apache-commons-lang3.version>3.20.0</apache-commons-lang3.version>
         <jackson-datatype-jsr310.version>2.21.0</jackson-datatype-jsr310.version>
         <datafaker.version>2.5.3</datafaker.version>
+        <!--
+         TODO: Remove override when Spring Boot has updated AssertJ to version 3.27.7 or higher.
+          This is a temporary solution to solve vulnerability CVE-2026-24400-->
+        <assertj.version>3.27.7</assertj.version>
+        <spring-boot-starter-parent.version>4.0.2</spring-boot-starter-parent.version>
     </properties>
     <dependencies>
         <!-- Spring Boot Dependencies -->
